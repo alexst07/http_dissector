@@ -13,6 +13,9 @@ answers = []
 def has_http_header(packet):
     return packet.haslayer(HTTPResponse)
 
+def printGET(packet, file_name):
+	httpLayer = packet['HTTP Request']
+	print file_name, ': ', httpLayer.Method, ' ', httpLayer.Path, "\n"
 
 def extractNextFile(packets, file_name):
 	if ! has_http_header(packets[0]):
