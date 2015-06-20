@@ -13,20 +13,31 @@ answers = []
 def has_http_header(packet):
     return packet.haslayer(HTTPResponse)
 
+
 def printGET(packet, file_name):
-	httpLayer = packet['HTTP Request']
-	print file_name, ': ', httpLayer.Method, ' ', httpLayer.Path, "\n"
+    httpLayer = packet['HTTP Request']
+    print file_name, ': ', httpLayer.Method, ' ', httpLayer.Path, "\n"
+
 
 def extract_next_file(packets, file_name):
-    if ! has_http_header(packets[0]):
+    if len(packets) == 0:
+        return False
+
+    if not has_http_header(packets[0]):
         return False
 
     first = packets.pop(0)
-    f = open(file_name, 'w+')
-    f.write(first['Raw'])
-    while !has_http_header(packets[0]):
+
+    # if there is no Raw length file is zero
+    if "Raw" not in first:
+        return True
+
+    f = open(file_name, 'wb')
+
+    f.write(first['Raw'].load)
+    while len(packets) > 0 and not has_http_header(packets[0]):
         pkt = packets.pop(0)
-        f.write(pkt['Raw'])
+        f.write(pkt['Raw'].load)
     f.close()
     return True
 
@@ -47,8 +58,8 @@ print '=============== REQUESTS =================='
 i = 0
 for req in requests:
     file_name = "file_" + str(i)
-    printGET(file_name)
-    extract_next_file(answer, file_name)
+    printGET(req, file_name)
+    extract_next_file(answers, file_name)
     i += 1
     
 
