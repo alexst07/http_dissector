@@ -13,6 +13,21 @@ answers = []
 def has_http_header(packet):
     return packet.haslayer(HTTPResponse)
 
+
+def extractNextFile(packets, file_name):
+	if ! has_http_header(packets[0]):
+		return False
+
+	first = packets.pop(0)
+	f = open(file_name, 'w+')
+	f.write(first['Raw'])
+	while !has_http_header(packets[0]):
+		pkt = packets.pop(0)
+		f.write(pkt['Raw'])
+	f.close()
+	return True
+
+
 for pkt in packets:
     tcp = pkt['TCP']
     # destination port must be 80
@@ -29,20 +44,8 @@ for pkt in packets:
 print '=============== REQUESTS =================='
 i = 0
 for req in requests:
-    print 'Packet: ', i, "\n"
-    i = i + 1
-    req.show()
-
-
-
-print '=============== ANSWERS =================='
-i = 0
-for ans in answers:
-    print 'Packet: ', i, "\n"
-    i = i + 1
-    if has_http_header(ans):
-    	print "HAS HEADER\n"
-    else:
-    	print "NO HEADER\n"
-    ans.show()
+	file_name = get_name(req)
+    printGET(file_name)
+	extractNextFile(answer, fileName)
+    
 
