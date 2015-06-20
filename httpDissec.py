@@ -11,7 +11,7 @@ answers = {}
 
 
 def has_http_header(packet):
-    return ans.haslayer(HTTPResponse)
+    return packet.haslayer(HTTPResponse)
 
 for pkt in packets:
     tcp = pkt['TCP']
