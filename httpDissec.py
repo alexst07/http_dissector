@@ -17,18 +17,18 @@ def printGET(packet, file_name):
 	httpLayer = packet['HTTP Request']
 	print file_name, ': ', httpLayer.Method, ' ', httpLayer.Path, "\n"
 
-def extractNextFile(packets, file_name):
-	if ! has_http_header(packets[0]):
-		return False
+def extract_next_file(packets, file_name):
+    if ! has_http_header(packets[0]):
+        return False
 
-	first = packets.pop(0)
-	f = open(file_name, 'w+')
-	f.write(first['Raw'])
-	while !has_http_header(packets[0]):
-		pkt = packets.pop(0)
-		f.write(pkt['Raw'])
-	f.close()
-	return True
+    first = packets.pop(0)
+    f = open(file_name, 'w+')
+    f.write(first['Raw'])
+    while !has_http_header(packets[0]):
+        pkt = packets.pop(0)
+        f.write(pkt['Raw'])
+    f.close()
+    return True
 
 
 for pkt in packets:
@@ -43,12 +43,12 @@ for pkt in packets:
     if tcp.sport == 80 and pkt.haslayer('HTTP'):
         answers.append(pkt)
 
-
 print '=============== REQUESTS =================='
 i = 0
 for req in requests:
-	file_name = get_name(req)
+    file_name = "file_" + str(i)
     printGET(file_name)
-	extractNextFile(answer, fileName)
+    extract_next_file(answer, file_name)
+    i += 1
     
 
