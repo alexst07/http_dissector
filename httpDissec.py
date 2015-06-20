@@ -4,6 +4,7 @@ from scapy.all import *
 from scapy.layers import http
 from scapy.layers.http import HTTPResponse
 import sys
+import os
 
 packets = rdpcap("task07_f1.pcap")
 requests = []
@@ -19,6 +20,28 @@ def printGET(packet, file_name):
     print file_name, ': ', httpLayer.Method, ' ', httpLayer.Path, "\n"
 
 
+def dechunk_file(filename):
+	chunked = open(filename, 'r')
+	dechunked = open('dechunked.tmp', 'w')
+	while True:
+		line = chunked.readline()
+
+		if not line:
+			break
+		value16, _ = line.split('\r')
+		value10 = int(value16, 16)
+
+		dechunked.write(chunked.read(value10))
+		# ignore '\r\n' the lies in the final of the chunk
+		chunked.read(2)
+
+	chunked.close()
+	dechunked.close()
+	# renaming the dechunked file to the original name
+	os.remove(filename)
+	os.rename('dechunked.tmp', filename)
+
+
 def extract_next_file(packets, file_name):
     if len(packets) == 0:
         return False
@@ -30,7 +53,7 @@ def extract_next_file(packets, file_name):
 
     # if there is no Raw length file is zero
     if "Raw" not in first:
-        return True
+        return False
 
     f = open(file_name, 'wb')
 
@@ -58,8 +81,8 @@ print '=============== REQUESTS =================='
 i = 0
 for req in requests:
     file_name = "file_" + str(i)
-    printGET(req, file_name)
-    extract_next_file(answers, file_name)
+    if extract_next_file(answers, file_name):
+		printGET(req, file_name)
     i += 1
     
 
