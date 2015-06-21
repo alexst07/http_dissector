@@ -11,10 +11,15 @@ import optparse
 def has_http_header(packet):
     return packet.haslayer(HTTPResponse)
 
+def transfering_chunked(packet):
+    httpLayer = packet['HTTP Response']
+    return ('Transfer-Encoding' in httpLayer.fields and 
+		httpLayer.fields['Transfer-Encoding'] == 'chunked')
+
 
 def printGET(packet, file_name):
     httpLayer = packet['HTTP Request']
-    print file_name, ': ', httpLayer.Method, ' ', httpLayer.Path, "\n"
+    print file_name,': ', httpLayer.Method, ' ', httpLayer.Path, "\n"
 
 
 def dechunk_file(filename):
@@ -58,6 +63,10 @@ def extract_next_file(packets, file_name):
         pkt = packets.pop(0)
         f.write(pkt['Raw'].load)
     f.close()
+
+    if transfering_chunked(first):
+        dechunk_file(file_name)
+
     return True
 
 
